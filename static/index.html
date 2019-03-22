@@ -285,6 +285,16 @@ function wsSetup() {
     socket = new WebSocket(url);
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
+        //reference from: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/onopen
+        console.log("WebSocket is open now.");
+        var url = "/world";
+        //reference from: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+        fetch(url).then(res => res.json()).then(function(body){
+            for(var entity in body){
+                world[entity] = body[entity];
+                drawNextFrame();
+            };
+        });
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
