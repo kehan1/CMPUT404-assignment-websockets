@@ -19,6 +19,7 @@ pip install -r requirements.txt
 
 Contributors / Licensing
 ========================
+Kehan Wang
 
 Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle.
 
@@ -59,3 +60,11 @@ Contributors
 * Mark Galloway
 * Abram Hindle
 * Cole Mackenzie
+
+References
+============
+By Abram Hindle: <br>
+https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/ObserverExampleAJAX/server.py<br>
+https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/chat.py
+createRadialGradient() referenced: http://www.softwhy.com/article-9676-1.html<br>
+get randomColor Anatoliy: https://stackoverflow.com/questions/1484506/random-color-generator

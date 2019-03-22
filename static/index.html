@@ -22,7 +22,7 @@
     "/>
     <script src="json2.js"></script>
   </head> 
-  <body bgcolor="white" height="100%" width="100%"> 
+  <body bgcolor="#FFE4E1" height="100%" width="100%"> 
     <div id="debug"></div>
     <canvas id="c" width="100%" height="100%" style="-webkit-tap-highlight-color: transparent;"></canvas> 
 
@@ -52,10 +52,26 @@ function drawCircle(context,entity) {
         var x = entity["x"];
         var y = entity["y"];
         //moveTo(x,y);
-        fillStyle = entity["colour"];
-        strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
-        stroke();                                
+        var color1 = getRandomColor();
+        var color2 = getRandomColor();
+        var color3 = getRandomColor();
+
+        if (entity["radius"]!= 30){
+            //createRadialGradient() referenced: http://www.softwhy.com/article-9676-1.html
+            let gnt = createRadialGradient(x, y, 10, x, y, 5);
+            gnt.addColorStop(0, color1);
+            gnt.addColorStop(0.5, color2);
+            gnt.addColorStop(1, color3);
+            fillStyle = gnt;
+            strokeStyle = fillStyle;
+            arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
+            fill();
+            stroke();
+        }else{
+            strokeStyle = entity["colour"];
+            arc(x, y, (entity["radius"])?entity["radius"]:50,0, 2 * Math.PI, false);  
+            stroke();   
+            }                              
     }
 }
 
@@ -72,7 +88,7 @@ function prepEntity(entity) {
 function clearFrame() {
     with(context) {
 	moveTo(0,0);
-	fillStyle = "#000";
+	fillStyle = "#FFE4E1";
 	fillRect(0,0,W,H);
     }
 
@@ -125,6 +141,9 @@ function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
+    var newEntity = {};
+    newEntity[entity] = data;
+    socket.send(JSON.stringify(newEntity));
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -231,18 +250,30 @@ mouse = (function() {
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    var color = getRandomColor()
+    addEntityWithoutName({'x':x,'y':y,'colour':color, 'radius': 30});
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+    var color = getRandomColor()
+    addEntityWithoutName({'x':x,'y':y,'colour':color, 'radius': 30});
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'green',
+    var color = getRandomColor()
+    addEntityWithoutName({'x':x,'y':y,'colour':color,
                           'radius':10});
 });
 
+//get randomColor Anatoliy: https://stackoverflow.com/questions/1484506/random-color-generator
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
 
 function update() {
     drawFrame();
@@ -261,7 +292,13 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            //XXX: TODO What are you going to do here? 
+            var message = JSON.parse(msg.data);  
+            for (let entity in message) {
+                world[entity] = message[entity];
+            drawNextFrame()
+            } 
+
         } catch (e) {
             alert("socket on message: " + e);
         }
